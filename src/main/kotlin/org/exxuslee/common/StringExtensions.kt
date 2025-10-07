@@ -8,3 +8,4 @@ fun String.removePrefixFromLink(): String =
         .trim()
 
 
+
