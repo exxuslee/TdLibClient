@@ -8,13 +8,17 @@
         </encoder>
     </appender>
 
+    <!-- Отключаем все логи TDLight -->
+    <logger name="it.tdlight" level="OFF" additivity="false"/>
+    <logger name="it.tdlight.TDLight" level="OFF" additivity="false"/>
+    <logger name="it.tdlight.TelegramClient" level="OFF" additivity="false"/>
+    <logger name="org.drinkless" level="OFF" additivity="false"/>
+    <logger name="it.tdlight.client" level="OFF" additivity="false"/>
+    <logger name="it.tdlight.jni" level="OFF" additivity="false"/>
+
     <!-- Логи для всего приложения -->
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
-
-    <!-- Если нужно больше подробностей по TDLight -->
-    <logger name="it.tdlight.TDLight" level="OFF"/>
-    <logger name="org.drinkless" level="OFF"/>
 
 </configuration>
