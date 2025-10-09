@@ -50,5 +50,6 @@ env
 .env.*.local
 .kotlin
 data.db
+count.json
 tdlib-session-*
 /.idea/

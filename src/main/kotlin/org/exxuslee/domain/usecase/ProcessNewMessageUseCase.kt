@@ -50,7 +50,7 @@ class ProcessNewMessageUseCase(
                 else -> "⚪️"
             }
 
-            val push = "${iconDiv}${iconCount} | div: ${"%.1f".format(div)} | count: ${"%.1f".format(count)}"
+            val push = "${iconDiv}${iconCount} | div:$div | count:$count"
             println("$push\n")
             telegramBotRepository.sendMessage(push)
 
