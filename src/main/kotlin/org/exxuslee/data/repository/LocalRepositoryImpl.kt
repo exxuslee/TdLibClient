@@ -1,5 +1,7 @@
 package org.exxuslee.data.repository
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.exxuslee.domain.model.LocalData
@@ -10,6 +12,7 @@ import java.io.File
 
 class LocalRepositoryImpl : LocalRepository {
     private val json = Json { prettyPrint = true }
+    private val fileMutex = Mutex()
 
     companion object {
         private const val PATH = "count.json"
@@ -22,8 +25,10 @@ class LocalRepositoryImpl : LocalRepository {
         return Json.decodeFromString<LocalData>(json)
     }
 
-    override fun saveLocalDataToFile(localData: LocalData) {
+    override suspend fun saveLocalDataToFile(localData: LocalData) {
         val json = json.encodeToString(localData)
-        File(PATH).writeText(json)
+        fileMutex.withLock {
+            File(PATH).writeText(json)
+        }
     }
 }
