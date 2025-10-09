@@ -27,7 +27,10 @@ class ProcessNewMessageUseCase(
                 (isCEX(arkhamMessage.from) && isCEX(arkhamMessage.to))
                 || (!isCEX(arkhamMessage.from) && !isCEX(arkhamMessage.to))
 
-            ) return Result.success(Unit)
+            ) {
+                telegramBotRepository.sendMessage(arkhamMessage.toString())
+                return Result.success(Unit)
+            }
 
             var inCex = 0.0
             var outCex = 0.0
