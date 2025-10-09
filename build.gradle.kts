@@ -1,7 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     kotlin("jvm") version "2.2.0"
     kotlin("plugin.serialization") version "2.2.0"
-
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "org.exxuslee"
@@ -39,4 +41,10 @@ tasks.test {
 }
 kotlin {
     jvmToolchain(21)
+}
+
+tasks.withType<ShadowJar> {
+    manifest {
+        attributes["Main-Class"] = "org.exxuslee.MainKt"
+    }
 }

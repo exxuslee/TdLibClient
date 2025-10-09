@@ -51,5 +51,6 @@ env
 .kotlin
 data.db
 count.json
+start.bat
 tdlib-session-*
 /.idea/
