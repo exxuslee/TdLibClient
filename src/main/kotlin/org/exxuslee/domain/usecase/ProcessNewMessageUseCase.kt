@@ -19,18 +19,16 @@ class ProcessNewMessageUseCase(
     suspend operator fun invoke(message: Message): Result<Unit> {
         try {
             val arkhamMessage = parseMessage(message)
-            println(arkhamMessage)
+            val isFrom = isCEX(arkhamMessage.from)
+            val isTo = isCEX(arkhamMessage.to)
+            if ((isFrom && isTo) || (!isFrom && !isTo)) {
+                telegramBotRepository.sendMessage("${arkhamMessage.from} - ${arkhamMessage.to}")
+                return Result.success(Unit)
+            }
+
             val posts = localRepository.readLocalDataFromFile().posts
             val updatedPosts = deleteOldPost(posts) + arkhamMessage
             localRepository.saveLocalDataToFile(LocalData(updatedPosts))
-            if (
-                (isCEX(arkhamMessage.from) && isCEX(arkhamMessage.to))
-                || (!isCEX(arkhamMessage.from) && !isCEX(arkhamMessage.to))
-
-            ) {
-                telegramBotRepository.sendMessage(arkhamMessage.toString())
-                return Result.success(Unit)
-            }
 
             var inCex = 0.0
             var outCex = 0.0
