@@ -34,25 +34,27 @@ class ProcessNewMessageUseCase(
                 val coefficient = coefficient(post.timestamp)
 
                 when {
-                    isFromCEX && !isToCEX -> outCex += amount * coefficient
-                    !isFromCEX && isToCEX -> inCex -= amount * coefficient
+                    isFromCEX && !isToCEX -> outCex -= amount * coefficient
+                    !isFromCEX && isToCEX -> inCex += amount * coefficient
                 }
 
             }
 
-            val count = (outCex - inCex).toLong()
+            println("inCex: $inCex outCex: $outCex")
+
+            val count = (inCex - outCex).toLong()
             val ruLocale = Locale.Builder().setLanguage("ru").setRegion("RU").build()
             val countFormatted = NumberFormat.getNumberInstance(ruLocale).format(count)
-            val div = if (outCex != 0.0 && inCex != 0.0) outCex / inCex else 0.0
-            val divText = if (outCex != 0.0) "%.1f".format(div) else "N/A"
+            val div = if (outCex != 0.0 && inCex != 0.0) abs(outCex / inCex) else 1.0
+            val divText = if (inCex != 0.0) "%.1f".format(div) else "N/A"
             val iconCount = when {
                 count > 0 -> "🚀"
                 count < 0 -> "🔻"
                 else -> "⚪️"
             }
             val iconDiv = when {
-                abs(div) > 1 -> "📈"
-                abs(div) < 1 -> "📉"
+                div > 1 -> "📈"
+                div < 1 -> "📉"
                 else -> "⚪️"
             }
 
@@ -133,20 +135,9 @@ class ProcessNewMessageUseCase(
         val usdStr = match.groupValues[2].replace(",", "")
         val usdValue = usdStr.toDouble().toLong()
 
-        val ticker = when {
-            tickerRaw.contains("Tether", ignoreCase = true) ||
-                    tickerRaw.contains("USDT", ignoreCase = true) -> "USDT"
+        val isStable = tickerRaw.contains("USD", ignoreCase = true)
 
-            tickerRaw.contains("USDC", ignoreCase = true) -> "USDC"
-            tickerRaw.contains("ETH", ignoreCase = true) -> "ETH"
-            tickerRaw.contains("BTC", ignoreCase = true) -> "BTC"
-            else -> tickerRaw.uppercase()
-        }
-
-        return when (ticker) {
-            "USDT", "USDC" -> -usdValue
-            else -> usdValue
-        }
+        return if (isStable) usdValue else -usdValue
     }
 
     private fun parseTime(line: String): Long {
