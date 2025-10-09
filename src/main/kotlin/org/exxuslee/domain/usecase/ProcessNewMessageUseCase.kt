@@ -65,8 +65,8 @@ class ProcessNewMessageUseCase(
                 else -> "⚪️"
             }
 
-            val dir = if (isFrom) ">>" else "<<"
-            val push = "$dir ${iconDiv}${iconCount} | $divText | $countFormatted " +
+            val dir = if (isFrom) "<<" else ">>"
+            val push = "${arkhamMessage.network} $dir ${iconDiv}${iconCount} | $divText | $countFormatted " +
                     "(in:${"%.1f".format(inCex)} out:${"%.1f".format(outCex)}) "
             println("$push\n")
             telegramBotRepository.sendMessage(push)
