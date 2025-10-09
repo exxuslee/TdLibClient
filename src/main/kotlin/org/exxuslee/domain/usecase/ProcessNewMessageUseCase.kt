@@ -50,7 +50,7 @@ class ProcessNewMessageUseCase(
             val count = (outCex - inCex).toLong()
             val ruLocale = Locale.Builder().setLanguage("ru").setRegion("RU").build()
             val countFormatted = NumberFormat.getNumberInstance(ruLocale).format(count)
-            val div = if (outCex != 0.0 && inCex != 0.0) inCex * 100.0 / outCex else null
+            val div = if (outCex != 0.0 && inCex != 0.0) inCex / outCex else null
             val divText = if (outCex != 0.0) "%.1f".format(div) else "N/A"
             val iconCount = when {
                 count < 0 -> "🚀"
@@ -59,13 +59,13 @@ class ProcessNewMessageUseCase(
             }
             val iconDiv = when {
                 div == null -> "⚪️"
-                div > 100.0 -> "📉"
-                div in -100.0..100.0 -> "📈"
-                div < -100 -> "📉"
+                div > 1.0 -> "📉"
+                div in -1.0..1.0 -> "📈"
+                div < -1.0 -> "📉"
                 else -> "⚪️"
             }
 
-            val push = "${iconDiv}${iconCount} | $divText% | $countFormatted " +
+            val push = "${iconDiv}${iconCount} | $divText | $countFormatted " +
                     "(in:${"%.1f".format(inCex)} out:${"%.1f".format(outCex)}) "
             println("$push\n")
             telegramBotRepository.sendMessage(push)
