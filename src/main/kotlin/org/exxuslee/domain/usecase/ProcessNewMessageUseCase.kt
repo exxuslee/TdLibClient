@@ -5,6 +5,8 @@ import org.exxuslee.domain.model.LocalData
 import org.exxuslee.domain.model.Message
 import org.exxuslee.domain.repository.LocalRepository
 import org.exxuslee.domain.repository.TelegramBotRepository
+import java.text.NumberFormat
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
@@ -37,8 +39,10 @@ class ProcessNewMessageUseCase(
 
             }
 
-            val count = outCex - inCex
-            val div = if (count != 0.0) "%.1f".format(outCex / inCex) else "N/A"
+            val count = (outCex - inCex).toLong()
+            val ruLocale = Locale.Builder().setLanguage("ru").setRegion("RU").build()
+            val countFormatted = NumberFormat.getNumberInstance(ruLocale).format(count)
+            val div = if (outCex != 0.0 && inCex != 0.0) "%.1f".format(outCex / inCex) else "N/A"
             val iconCount = when {
                 count > 0 -> "🚀"
                 count < 0 -> "🔻"
@@ -50,7 +54,7 @@ class ProcessNewMessageUseCase(
                 else -> "⚪️"
             }
 
-            val push = "${iconDiv}${iconCount} | div:$div | count:$count"
+            val push = "${iconDiv}${iconCount} | $div | $countFormatted"
             println("$push\n")
             telegramBotRepository.sendMessage(push)
 
