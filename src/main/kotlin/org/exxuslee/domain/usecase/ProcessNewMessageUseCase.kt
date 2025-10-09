@@ -17,12 +17,17 @@ class ProcessNewMessageUseCase(
     private val localRepository: LocalRepository,
 ) {
     suspend operator fun invoke(message: Message): Result<Unit> {
-        return try {
+        try {
             val arkhamMessage = parseMessage(message)
             println(arkhamMessage)
             val posts = localRepository.readLocalDataFromFile().posts
             val updatedPosts = deleteOldPost(posts) + arkhamMessage
             localRepository.saveLocalDataToFile(LocalData(updatedPosts))
+            if (
+                (isCEX(arkhamMessage.from) && isCEX(arkhamMessage.to))
+                || (!isCEX(arkhamMessage.from) && !isCEX(arkhamMessage.to))
+
+            ) return Result.success(Unit)
 
             var inCex = 0.0
             var outCex = 0.0
@@ -62,9 +67,10 @@ class ProcessNewMessageUseCase(
             println("$push\n")
             telegramBotRepository.sendMessage(push)
 
-            Result.success(Unit)
+            return Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            telegramBotRepository.sendMessage(e.message ?: "Unknown error")
+            return Result.failure(e)
         }
     }
 
