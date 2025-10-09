@@ -8,7 +8,6 @@ import org.exxuslee.domain.repository.TelegramBotRepository
 import java.text.NumberFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -40,7 +39,7 @@ class ProcessNewMessageUseCase(
                 val coefficient = coefficient(post.timestamp)
 
                 when {
-                    isFromCEX && !isToCEX -> outCex -= amount * coefficient
+                    isFromCEX && !isToCEX -> outCex += amount * coefficient
                     !isFromCEX && isToCEX -> inCex += amount * coefficient
                 }
 
@@ -48,23 +47,26 @@ class ProcessNewMessageUseCase(
 
             println("inCex: $inCex outCex: $outCex")
 
-            val count = (inCex - outCex).toLong()
+            val count = (outCex - inCex).toLong()
             val ruLocale = Locale.Builder().setLanguage("ru").setRegion("RU").build()
             val countFormatted = NumberFormat.getNumberInstance(ruLocale).format(count)
-            val div = if (outCex != 0.0 && inCex != 0.0) abs(outCex / inCex) else 1.0
-            val divText = if (inCex != 0.0) "%.1f".format(div) else "N/A"
+            val div = if (outCex != 0.0 && inCex != 0.0) inCex * 100.0 / outCex else null
+            val divText = if (outCex != 0.0) "%.1f".format(div) else "N/A"
             val iconCount = when {
-                count > 0 -> "🚀"
-                count < 0 -> "🔻"
+                count < 0 -> "🚀"
+                count > 0 -> "🔻"
                 else -> "⚪️"
             }
             val iconDiv = when {
-                div > 1 -> "📈"
-                div < 1 -> "📉"
+                div == null -> "⚪️"
+                div > 100.0 -> "📉"
+                div in -100.0..100.0 -> "📈"
+                div < -100 -> "📉"
                 else -> "⚪️"
             }
 
-            val push = "${iconDiv}${iconCount} | $divText | $countFormatted"
+            val push = "${iconDiv}${iconCount} | $divText% | $countFormatted " +
+                    "(in:${"%.1f".format(inCex)} out:${"%.1f".format(outCex)}) "
             println("$push\n")
             telegramBotRepository.sendMessage(push)
 
