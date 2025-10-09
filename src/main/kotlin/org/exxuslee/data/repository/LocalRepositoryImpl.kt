@@ -6,19 +6,24 @@ import org.exxuslee.domain.model.LocalData
 import org.exxuslee.domain.repository.LocalRepository
 import java.io.File
 
+
+
 class LocalRepositoryImpl : LocalRepository {
+    private val json = Json { prettyPrint = true }
 
     companion object {
         private const val PATH = "count.json"
     }
 
     override fun readLocalDataFromFile(): LocalData {
-        val json = File(PATH).readText()
-        return Json.Default.decodeFromString<LocalData>(json)
+        val file = File(PATH)
+        if (!file.exists()) return LocalData(emptyList())
+        val json = file.readText()
+        return Json.decodeFromString<LocalData>(json)
     }
 
     override fun saveLocalDataToFile(localData: LocalData) {
-        val json = Json.Default.encodeToString(localData)
+        val json = json.encodeToString(localData)
         File(PATH).writeText(json)
     }
 }

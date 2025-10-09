@@ -1,6 +1,5 @@
 package org.exxuslee.domain.usecase
 
-import org.exxuslee.domain.model.Amount
 import org.exxuslee.domain.model.ArkhamMessage
 import org.exxuslee.domain.model.LocalData
 import org.exxuslee.domain.model.Message
@@ -17,12 +16,13 @@ class ProcessNewMessageUseCase(
     suspend operator fun invoke(message: Message): Result<Unit> {
         return try {
             val arkhamMessage = parseMessage(message)
+            println(arkhamMessage)
             val posts = localRepository.readLocalDataFromFile().posts
             val updatedPosts = deleteOldPost(posts) + arkhamMessage
             localRepository.saveLocalDataToFile(LocalData(updatedPosts))
 
-            var countCoin = 0.0
-            var countStable = 0.0
+            var inCex = 0.0
+            var outCex = 0.0
 
             updatedPosts.forEach { post ->
                 val isFromCEX = isCEX(post.from)
@@ -30,25 +30,28 @@ class ProcessNewMessageUseCase(
                 val amount = parseAmount(post.value) ?: return@forEach
                 val coefficient = coefficient(post.timestamp)
 
-                val sign = when {
-                    isFromCEX && !isToCEX -> +1
-                    !isFromCEX && isToCEX -> -1
-                    else -> 0
+                when {
+                    isFromCEX && !isToCEX -> outCex += amount * coefficient
+                    !isFromCEX && isToCEX -> inCex -= amount * coefficient
                 }
 
-                if (sign != 0) {
-                    when (amount) {
-                        is Amount.Coin -> countCoin += sign * amount.value * coefficient
-                        is Amount.Stable -> countStable += sign * amount.value * coefficient
-                    }
-                }
             }
 
-            val divText = if (countCoin != 0.0) "%.1f".format(countCoin / countCoin) else "N/A"
-            val push = "countCoin: ${"%.1f".format(countCoin)} " +
-                    "countStable: ${"%.1f".format(countStable)} " +
-                    "div: $divText"
-            println("$push\n$arkhamMessage\n")
+            val count = outCex - inCex
+            val div = if (count != 0.0) "%.1f".format(outCex / inCex) else "N/A"
+            val iconCount = when {
+                count > 0 -> "🚀"
+                count < 0 -> "🔻"
+                else -> "⚪️"
+            }
+            val iconDiv = when {
+                (div.toDoubleOrNull() ?: 1.0) > 1 -> "📈"
+                (div.toDoubleOrNull() ?: 1.0) < 1 -> "📉"
+                else -> "⚪️"
+            }
+
+            val push = "${iconDiv}${iconCount} | div: ${"%.1f".format(div)} | count: ${"%.1f".format(count)}"
+            println("$push\n")
             telegramBotRepository.sendMessage(push)
 
             Result.success(Unit)
@@ -117,7 +120,7 @@ class ProcessNewMessageUseCase(
         return keywords.any { keyword -> address.contains(keyword, ignoreCase = true) }
     }
 
-    private fun parseAmount(line: String): Amount? {
+    private fun parseAmount(line: String): Long? {
         val regex = """[\d,\.]+\s+([A-Za-z ]+)\s+\(\$(.*?)\)""".toRegex()
         val match = regex.find(line) ?: return null
         val tickerRaw = match.groupValues[1].trim()
@@ -135,8 +138,8 @@ class ProcessNewMessageUseCase(
         }
 
         return when (ticker) {
-            "USDT", "USDC" -> Amount.Stable(usdValue)
-            else -> Amount.Coin(usdValue)
+            "USDT", "USDC" -> -usdValue
+            else -> usdValue
         }
     }
 
