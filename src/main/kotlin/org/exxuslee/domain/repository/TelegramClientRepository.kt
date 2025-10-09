@@ -4,7 +4,7 @@ import org.exxuslee.domain.model.Chat
 import org.exxuslee.domain.model.Message
 import java.util.function.Consumer
 
-interface TelegramRepository {
+interface TelegramClientRepository {
     suspend fun getSubscribedChannelIds(): List<Long>
     suspend fun getChat(chatId: Long): Chat
     suspend fun getLastMessage(chatId: Long): String?

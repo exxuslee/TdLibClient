@@ -1,4 +1,4 @@
-package org.exxuslee.data.tdlight
+package org.exxuslee.data.repository
 
 import it.tdlight.client.SimpleTelegramClient
 import it.tdlight.jni.TdApi
@@ -6,14 +6,14 @@ import org.exxuslee.common.removePrefixFromLink
 import org.exxuslee.domain.model.Chat
 import org.exxuslee.domain.model.Message
 import org.exxuslee.domain.model.MessageType
-import org.exxuslee.domain.repository.TelegramRepository
+import org.exxuslee.domain.repository.TelegramClientRepository
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.function.Consumer
 
-class TdLightTelegramRepository(
+class TelegramClientRepositoryImpl(
     private val client: SimpleTelegramClient
-) : TelegramRepository {
+) : TelegramClientRepository {
 
     private var messageHandler: Consumer<Message>? = null
 
@@ -111,7 +111,7 @@ class TdLightTelegramRepository(
         return Message(
             id = tdMessage.id,
             chatId = tdMessage.chatId,
-            senderId = tdMessage.senderId?.let { 
+            senderId = tdMessage.senderId?.let {
                 when (it) {
                     is TdApi.MessageSenderUser -> it.userId
                     is TdApi.MessageSenderChat -> it.chatId
@@ -124,6 +124,3 @@ class TdLightTelegramRepository(
         )
     }
 }
-
-
-

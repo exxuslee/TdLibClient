@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "2.2.0"
+    kotlin("plugin.serialization") version "1.9.24"
 }
 
 group = "org.exxuslee"
@@ -24,6 +25,9 @@ dependencies {
             classifier = architecture
         }
     }
+    implementation("org.telegram:telegrambots-client:9.0.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 
     runtimeOnly("org.slf4j:slf4j-simple:2.0.12")
     testImplementation(kotlin("test"))

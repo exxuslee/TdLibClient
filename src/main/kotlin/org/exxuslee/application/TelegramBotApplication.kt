@@ -1,29 +1,32 @@
 package org.exxuslee.application
 
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import org.exxuslee.data.network.TelegramBotService
+import org.exxuslee.data.repository.LocalRepositoryImpl
+import org.exxuslee.data.repository.TelegramBotRepositoryImpl
 import org.exxuslee.data.tdlight.TdLightClientProvider
-import org.exxuslee.data.tdlight.TdLightTelegramRepository
+import org.exxuslee.data.repository.TelegramClientRepositoryImpl
 import org.exxuslee.domain.service.MessageSubscriptionService
-import org.exxuslee.domain.usecase.GetChatHistoryUseCase
 import org.exxuslee.domain.usecase.ProcessNewMessageUseCase
 import org.exxuslee.domain.usecase.SubscribeToChatUseCase
 
 class TelegramBotApplication {
-    
+
     private val clientProvider = TdLightClientProvider()
-    private val repository = TdLightTelegramRepository(clientProvider.client)
-    
-    private val getChatHistoryUseCase = GetChatHistoryUseCase(repository)
-    private val processNewMessageUseCase = ProcessNewMessageUseCase(repository)
-    private val subscribeToChatUseCase = SubscribeToChatUseCase(repository)
-    
+    private val botService = TelegramBotService.Base()
+    private val tgClientRepository = TelegramClientRepositoryImpl(clientProvider.client)
+    private val tgBotRepository = TelegramBotRepositoryImpl(botService)
+    private val localRepository = LocalRepositoryImpl()
+
+    private val processNewMessageUseCase = ProcessNewMessageUseCase(tgBotRepository, localRepository)
+    private val subscribeToChatUseCase = SubscribeToChatUseCase(tgClientRepository)
+
     private val messageSubscriptionService = MessageSubscriptionService(
-        repository = repository,
+        repository = tgClientRepository,
         processNewMessageUseCase = processNewMessageUseCase,
         subscribeToChatUseCase = subscribeToChatUseCase
     )
-    
+
     suspend fun start(targetChatId: Long) {
         println("Client initialized and authenticated.")
         messageSubscriptionService.subscribeToChat(targetChatId)
@@ -38,7 +41,7 @@ class TelegramBotApplication {
             delay(15000)
         }
     }
-    
+
     fun stop() {
         messageSubscriptionService.unsubscribeFromChat()
     }

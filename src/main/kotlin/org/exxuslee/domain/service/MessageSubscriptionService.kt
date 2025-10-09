@@ -1,15 +1,21 @@
 package org.exxuslee.domain.service
 
-import org.exxuslee.domain.repository.TelegramRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import org.exxuslee.domain.repository.TelegramClientRepository
 import org.exxuslee.domain.usecase.ProcessNewMessageUseCase
 import org.exxuslee.domain.usecase.SubscribeToChatUseCase
 
 class MessageSubscriptionService(
-    private val repository: TelegramRepository,
+    private val repository: TelegramClientRepository,
     private val processNewMessageUseCase: ProcessNewMessageUseCase,
     private val subscribeToChatUseCase: SubscribeToChatUseCase
 ) {
-    
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     suspend fun subscribeToChat(chatId: Long): Result<Unit> {
         return try {
             // Подписываемся на чат
@@ -18,7 +24,9 @@ class MessageSubscriptionService(
             // Настраиваем обработчик сообщений
             repository.addMessageUpdateHandler { message ->
                 if (message.chatId == chatId) {
-                    processNewMessageUseCase(message)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        processNewMessageUseCase(message)
+                    }
                 }
             }
             
@@ -30,5 +38,6 @@ class MessageSubscriptionService(
     
     fun unsubscribeFromChat() {
         repository.removeMessageUpdateHandler()
+        scope.cancel()
     }
 }

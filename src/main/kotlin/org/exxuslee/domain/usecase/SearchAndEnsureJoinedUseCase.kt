@@ -1,9 +1,9 @@
 package org.exxuslee.domain.usecase
 
-import org.exxuslee.domain.repository.TelegramRepository
+import org.exxuslee.domain.repository.TelegramClientRepository
 
 class SearchAndEnsureJoinedUseCase(
-    private val repository: TelegramRepository
+    private val repository: TelegramClientRepository
 ) {
     suspend operator fun invoke(linkOrUsername: String, limit: Int): List<String> {
         val chat = repository.searchPublicChat(linkOrUsername)
