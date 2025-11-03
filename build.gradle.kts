@@ -9,7 +9,8 @@ plugins {
 
 group = "org.exxuslee"
 version = ""
-val architecture = "windows_amd64"
+//val architecture = "windows_amd64"
+val architecture = "linux_arm64_gnu_ssl3"
 
 
 repositories {

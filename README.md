@@ -118,17 +118,18 @@ This project follows Clean Architecture principles:
 ./gradlew build
 ```
 
-### Testing
+# Перезагрузить systemd, чтобы подхватить новый юнит
+sudo systemctl daemon-reload
 
-```bash
-./gradlew test
-```
+# Автозапуск при загрузке системы
+sudo systemctl enable arkhambot
+sudo systemctl disable arkhambot
 
-### Running
-
-```bash
-./gradlew run
-```
+# Запустить сервис вручную
+sudo systemctl start arkhambot
+sudo systemctl status arkhambot
+sudo systemctl stop arkhambot
+sudo systemctl restart arkhambot
 
 ## Configuration
 
