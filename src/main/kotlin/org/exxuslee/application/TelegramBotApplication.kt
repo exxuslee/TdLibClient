@@ -29,6 +29,7 @@ class TelegramBotApplication {
 
     suspend fun start(targetChatId: Long) {
         println("Client initialized and authenticated.")
+        tgBotRepository.sendMessage("Bot started")
         messageSubscriptionService.subscribeToChat(targetChatId)
             .onSuccess {
                 println("Successfully subscribed to chat $targetChatId")
@@ -36,7 +37,6 @@ class TelegramBotApplication {
             .onFailure { error ->
                 println("Failed to subscribe to chat $targetChatId: ${error.message}")
             }
-        println("Press Ctrl+C to stop.")
         while (true) {
             delay(15000)
         }

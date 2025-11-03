@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "org.exxuslee"
-version = "1.0-SNAPSHOT"
+version = ""
 val architecture = "windows_amd64"
 
 
@@ -32,7 +32,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 
-    runtimeOnly("org.slf4j:slf4j-simple:2.0.12")
+    implementation("ch.qos.logback:logback-classic:1.5.12")
     testImplementation(kotlin("test"))
 }
 
