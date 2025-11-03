@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "2.2.0"
     kotlin("plugin.serialization") version "2.2.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    application
 }
 
 group = "org.exxuslee"
@@ -39,8 +40,13 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
 kotlin {
     jvmToolchain(21)
+}
+
+application {
+    mainClass.set("org.exxuslee.MainKt")
 }
 
 tasks.withType<ShadowJar> {

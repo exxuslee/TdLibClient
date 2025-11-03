@@ -1,0 +1,17 @@
+[Unit]
+Description=ArkhamBot
+After=network.target
+
+[Service]
+Type=simple
+User=exxus
+WorkingDirectory=/home/exxus/arkhambot
+ExecStart=/usr/bin/java -jar /home/exxus/arkhambot/tdlibbot-all.jar
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/exxus/arkhambot/journalOut
+StandardError=append:/home/exxus/arkhambot/journalError
+SyslogIdentifier=arkhambot
+
+[Install]
+WantedBy=multi-user.target
