@@ -47,10 +47,9 @@ class ProcessNewMessageUseCase(
 
             println("inCex: $inCex outCex: $outCex")
 
+
             val count = (outCex - inCex).toLong()
-            val ruLocale = Locale.Builder().setLanguage("ru").setRegion("RU").build()
-            val countFormatted = NumberFormat.getNumberInstance(ruLocale).format(count)
-            val div = if (outCex != 0.0 && inCex != 0.0) inCex / outCex else null
+            val div = if (outCex != 0.0 && inCex != 0.0) outCex / inCex else null
             val divText = if (outCex != 0.0) "%.1f".format(div) else "N/A"
             val iconCount = when {
                 count < 0 -> "🚀"
@@ -59,14 +58,15 @@ class ProcessNewMessageUseCase(
             }
             val iconDiv = when {
                 div == null -> "⚪️"
-                div > 1.0 -> "📉"
-                div in -1.0..1.0 -> "📈"
-                div < -1.0 -> "📉"
+                div > 1.0 -> "📈"
+                div in -1.0..1.0 -> "📉"
+                div < -1.0 -> "📈"
                 else -> "⚪️"
             }
 
             val dir = if (isFrom) "<<" else ">>"
-            val push = "${arkhamMessage.network} $dir ${iconDiv}${iconCount} | $divText | $countFormatted " +
+            val amount = parseAmount(arkhamMessage.value)
+            val push = "${arkhamMessage.network} $dir ${iconDiv}${iconCount} ${amount}M | $divText" +
                     "(in:${"%.1f".format(inCex)} out:${"%.1f".format(outCex)}) "
             println("$push\n")
             telegramBotRepository.sendMessage(push)
@@ -143,7 +143,7 @@ class ProcessNewMessageUseCase(
         val match = regex.find(line) ?: return null
         val tickerRaw = match.groupValues[1].trim()
         val usdStr = match.groupValues[2].replace(",", "")
-        val usdValue = usdStr.toDouble().toLong()
+        val usdValue = (usdStr.toDouble() / 1_000_000).toLong()
 
         val isStable = tickerRaw.contains("USD", ignoreCase = true)
 
