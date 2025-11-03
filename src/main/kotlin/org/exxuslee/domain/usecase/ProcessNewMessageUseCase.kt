@@ -21,7 +21,7 @@ class ProcessNewMessageUseCase(
             val isFrom = isCEX(arkhamMessage.from)
             val isTo = isCEX(arkhamMessage.to)
             if ((isFrom && isTo) || (!isFrom && !isTo)) {
-                telegramBotRepository.sendMessage("${arkhamMessage.from} - ${arkhamMessage.to}")
+//                telegramBotRepository.sendMessage("${arkhamMessage.from} - ${arkhamMessage.to}")
                 return Result.success(Unit)
             }
 
