@@ -67,7 +67,7 @@ class ProcessNewMessageUseCase(
             val dir = if (isFrom) "<<" else ">>"
             val amount = parseAmount(arkhamMessage.value)
             val push = "${arkhamMessage.network} $dir ${iconDiv}${iconCount} ${amount}M | $divText" +
-                    "(in:${"%.1f".format(inCex)} out:${"%.1f".format(outCex)}) "
+                    "(in:${"%.1f".format(inCex)}M out:${"%.1f".format(outCex)}M) "
             println("$push\n")
             telegramBotRepository.sendMessage(push)
 
