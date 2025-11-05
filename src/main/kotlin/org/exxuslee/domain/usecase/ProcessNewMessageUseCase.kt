@@ -5,8 +5,6 @@ import org.exxuslee.domain.model.LocalData
 import org.exxuslee.domain.model.Message
 import org.exxuslee.domain.repository.LocalRepository
 import org.exxuslee.domain.repository.TelegramBotRepository
-import java.text.NumberFormat
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
@@ -52,22 +50,15 @@ class ProcessNewMessageUseCase(
             val div = if (outCex != 0.0 && inCex != 0.0) outCex / inCex else null
             val divText = if (outCex != 0.0) "%.1f".format(div) else "N/A"
             val iconCount = when {
-                count < 0 -> "🚀"
-                count > 0 -> "🔻"
-                else -> "⚪️"
-            }
-            val iconDiv = when {
-                div == null -> "⚪️"
-                div > 1.0 -> "📈"
-                div in -1.0..1.0 -> "📉"
-                div < -1.0 -> "📈"
+                count < 0 -> "🔻"
+                count > 0 -> "🚀"
                 else -> "⚪️"
             }
 
             val dir = if (isFrom) "<<" else ">>"
             val amount = parseAmount(arkhamMessage.value)
-            val push = "${arkhamMessage.network} $dir ${iconDiv}${iconCount} ${amount}M | $divText" +
-                    "(in:${"%.1f".format(inCex)}M out:${"%.1f".format(outCex)}M) "
+            val push = "${arkhamMessage.network} $dir ${amount}M | $iconCount $divText" +
+                    "(in:${"%.0f".format(inCex)}M out:${"%.0f".format(outCex)}M) "
             println("$push\n")
             telegramBotRepository.sendMessage(push)
 
@@ -147,7 +138,7 @@ class ProcessNewMessageUseCase(
 
         val isStable = tickerRaw.contains("USD", ignoreCase = true)
 
-        return if (isStable) usdValue else -usdValue
+        return if (isStable) -usdValue else usdValue
     }
 
     private fun parseTime(line: String): Long {
